@@ -1,0 +1,3706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart Buy · Procurement Decision Desk · ACG Films &amp; Foils</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --paper:#ffffff; --shell:#f4f4f6; --ink:#16181d; --ink2:#4a4d55; --mute:#7c8089;
+  --rule:#e2e3e7; --rule2:#eeeff1;
+  --acg:#c8102e; --acg-dk:#a00d25; --acg-wash:#fdf2f4;
+  --buy:#0f6b3f; --buy-wash:#eef6f1;
+  --defer:#8a5a00; --defer-wash:#fbf5e9;
+  --hold:#3f4a5c; --hold-wash:#f1f3f6;
+  --fail:#c8102e;
+  --disp:'Poppins',system-ui,sans-serif;
+  --body:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--shell);color:var(--ink);font-family:var(--body);
+     font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ---------- masthead ---------- */
+.mast{background:var(--acg);color:#fff;padding:calc(10px + env(safe-area-inset-top,0px)) 20px 10px}
+.mast-in{max-width:1560px;margin:0 auto;display:flex;align-items:center;
+         justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:12px}
+.brand b{font-family:var(--disp);font-weight:700;font-size:19px;letter-spacing:-.2px}
+.brand span{font-size:11px;opacity:.85;letter-spacing:.3px}
+.mast-meta{display:flex;gap:18px;font-size:11px;opacity:.9;align-items:center}
+.mast-meta b{font-weight:600}
+
+/* ---------- control strip ---------- */
+.strip{background:var(--paper);border-bottom:1px solid var(--rule);
+       position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.strip-in{max-width:1560px;margin:0 auto;padding:9px 20px;display:flex;
+          align-items:center;gap:22px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.seg button{font:500 12px/1 var(--body);padding:8px 15px;border:0;background:var(--paper);
+            color:var(--ink2);cursor:pointer;border-right:1px solid var(--rule)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--acg);color:#fff}
+.seg.small button{padding:6px 11px;font-size:11.5px}
+.striplab{font-size:10.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.7px;
+          font-weight:600;margin-right:-14px}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1560px;margin:0 auto;padding:16px 20px 40px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}
+.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}
+.c9{grid-column:span 9}.c12{grid-column:span 12}
+@media(max-width:1180px){.c3,.c4,.c5,.c6,.c7,.c8,.c9{grid-column:span 12}}
+
+.panel{background:var(--paper);border:1px solid var(--rule);border-radius:4px;
+       display:flex;flex-direction:column;min-width:0}
+.ph{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+    padding:10px 14px;border-bottom:1px solid var(--rule2)}
+.ph h2{margin:0;font:600 12.5px/1.3 var(--disp);letter-spacing:-.1px}
+.ph .sub{font-size:10.5px;color:var(--mute)}
+.pb{padding:14px}
+.pb.tight{padding:0}
+
+/* ---------- decision ---------- */
+.dec{padding:0}
+.decband{padding:16px 16px 14px;border-left:4px solid}
+.decband.buy{background:var(--buy-wash);border-color:var(--buy)}
+.decband.defer{background:var(--defer-wash);border-color:var(--defer)}
+.decband.hold{background:var(--hold-wash);border-color:var(--hold)}
+.dectag{font:600 10px/1 var(--body);letter-spacing:1.2px;text-transform:uppercase;opacity:.7}
+.decsig{font:700 30px/1.1 var(--disp);letter-spacing:-.6px;margin:7px 0 3px}
+.decsig.buy{color:var(--buy)}.decsig.defer{color:var(--defer)}.decsig.hold{color:var(--hold)}
+.decsub{font-size:12px;color:var(--ink2)}
+.decrows{padding:4px 16px 14px}
+.drow{display:flex;justify-content:space-between;align-items:baseline;
+      padding:9px 0;border-bottom:1px solid var(--rule2)}
+.drow:last-child{border-bottom:0}
+.drow .k{font-size:12px;color:var(--ink2)}
+.drow .v{font:600 14px/1 var(--mono);font-variant-numeric:tabular-nums}
+.pos{color:var(--buy)}.neg{color:var(--acg)}
+
+/* ---------- price header ---------- */
+.prices{display:flex;gap:0;border-bottom:1px solid var(--rule2)}
+.pcell{flex:1;padding:12px 14px;border-right:1px solid var(--rule2)}
+.pcell:last-child{border-right:0}
+.pcell .k{font-size:10px;color:var(--mute);text-transform:uppercase;
+          letter-spacing:.6px;font-weight:600}
+.pcell .v{font:600 20px/1.2 var(--mono);margin-top:4px;font-variant-numeric:tabular-nums}
+.pcell .d{font-size:11px;margin-top:2px;color:var(--mute)}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;font:600 10px/1.3 var(--body);letter-spacing:.6px;text-transform:uppercase;
+   color:var(--mute);padding:8px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:7px 12px;border-bottom:1px solid var(--rule2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.hl td{background:var(--acg-wash);font-weight:600}
+tbody tr.dim td{color:var(--mute)}
+td.r,th.r{text-align:right}
+.tw{overflow-x:auto}
+.chip{display:inline-block;font:600 9.5px/1 var(--body);letter-spacing:.4px;
+      padding:3px 6px;border-radius:2px;text-transform:uppercase}
+.chip.ok{background:var(--buy-wash);color:var(--buy)}
+.chip.no{background:var(--acg-wash);color:var(--acg)}
+.chip.warn{background:var(--defer-wash);color:var(--defer)}
+.chip.zero{background:#f0f0f2;color:var(--mute)}
+
+/* ---------- drivers ---------- */
+.dr{display:grid;grid-template-columns:1fr 46px 96px;gap:8px;align-items:center;
+    padding:7px 0;border-bottom:1px solid var(--rule2)}
+.dr:last-child{border-bottom:0}
+.dr .n{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dr .l{font:500 10.5px/1 var(--mono);color:var(--mute);text-align:right}
+.bar{position:relative;height:16px;background:var(--rule2);border-radius:1px}
+.bar i{position:absolute;top:0;bottom:0;left:50%;display:block}
+.bar i.p{background:var(--buy)}.bar i.n{background:var(--acg);left:auto;right:50%}
+.bar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;
+            width:1px;background:var(--mute);opacity:.45}
+
+/* ---------- calculator ---------- */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:11px;color:var(--ink2);margin-bottom:4px}
+.field input{width:100%;padding:8px 10px;border:1px solid var(--rule);border-radius:3px;
+             font:500 13px/1 var(--mono);color:var(--ink);background:var(--paper)}
+.field input:focus{outline:2px solid var(--acg);outline-offset:-1px;border-color:var(--acg)}
+.calcout{margin-top:12px;padding:12px 14px;background:var(--acg-wash);
+         border:1px solid #f3d3d9;border-radius:3px}
+.calcout .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;
+            color:var(--acg);font-weight:600}
+.calcout .v{font:700 26px/1.1 var(--mono);margin-top:4px;color:var(--acg-dk)}
+.calcout .f{font-size:11px;color:var(--ink2);margin-top:6px}
+
+/* ---------- misc ---------- */
+.chartbox{position:relative;padding:10px 12px 12px}
+.note{font-size:11px;color:var(--mute);padding:9px 14px;border-top:1px solid var(--rule2);
+      background:#fbfbfc}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0}
+.kpi{padding:12px 14px;border-right:1px solid var(--rule2)}
+.kpi:last-child{border-right:0}
+.kpi .k{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.kpi .v{font:600 19px/1.2 var(--mono);margin-top:4px}
+.kpi .f{font-size:10.5px;color:var(--mute);margin-top:2px}
+.foot{max-width:1560px;margin:0 auto;padding:18px 20px 30px;font-size:10.5px;
+      color:var(--mute);line-height:1.6;border-top:1px solid var(--rule)}
+.foot b{color:var(--ink2);font-weight:600}
+.flag{display:flex;gap:9px;align-items:flex-start;padding:10px 14px;
+      background:var(--acg-wash);border-top:1px solid #f3d3d9;font-size:11.5px;color:var(--ink2)}
+.flag b{color:var(--acg-dk)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<style>
+.chip.ok{white-space:nowrap}.sep td{background:var(--shell);font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--mute);font-weight:600}
+.notebox{padding:14px 18px;font-size:13px;line-height:1.6;color:var(--ink2)}
+.shapl{padding:4px 18px 14px}
+</style>
+</head>
+<body>
+
+<header class="mast">
+<div class="mast-in">
+<div class="brand">
+<b>Smart Buy</b>
+<span>ACG Films &amp; Foils &nbsp;/&nbsp; Procurement decision desk</span>
+</div>
+<div class="mast-meta">
+<span>Forecast origin <b id="mOrigin">—</b></span>
+<span id="mFolds">—</span>
+<span>Public data only · leakage-tested</span>
+</div>
+</div>
+</header>
+
+<div class="strip">
+<div class="strip-in">
+<span class="striplab">Material</span>
+<div class="seg" id="matSeg">
+<button data-mat="aluminium" aria-pressed="true">LME Aluminium</button>
+<button data-mat="pvc" aria-pressed="false">PVC proxy (US resin PPI)</button>
+</div>
+<span class="striplab">Horizon</span>
+<div class="seg small" id="hSeg"></div>
+<span style="margin-left:auto;font-size:11px;color:var(--mute)">
+Carrying cost <b class="num">1.0%</b>/month · thresholds ±2%, P(dir) ≥ 60%
+</span>
+</div>
+</div>
+
+<main class="wrap">
+<div class="grid">
+
+<section class="panel c12" id="staleBox" style="display:none">
+<div class="flag"><span>⚑</span><span id="staleTxt"></span></div>
+</section>
+
+<section class="panel c4">
+<div class="ph"><h2>Recommendation</h2><span class="sub" id="decH">3 months ahead</span></div>
+<div class="dec">
+<div class="decband hold" id="decBand">
+<div class="dectag">Signal</div>
+<div class="decsig hold" id="decSig">—</div>
+<div class="decsub" id="decSub">—</div>
+</div>
+<div class="decrows">
+<div class="drow"><span class="k">Expected saving, net of carry</span><span class="v" id="decSav">—</span></div>
+<div class="drow"><span class="k">P(price up)</span><span class="v" id="decPup">—</span></div>
+<div class="drow"><span class="k">Recommended cover</span><span class="v" id="decCov">—</span></div>
+<div class="drow"><span class="k">P10 – P90 range</span><span class="v" id="decBandR">—</span></div>
+<div class="drow"><span class="k">Models trusted at this horizon</span><span class="v" id="decModels" style="font-size:11px;text-align:right">—</span></div>
+</div>
+</div>
+</section>
+
+<section class="panel c8">
+<div class="ph"><h2 id="fcTitle">Price and six-month forecast</h2>
+<span class="sub" id="fcSub">—</span></div>
+<div class="prices">
+<div class="pcell"><div class="k">Latest</div><div class="v" id="pSpot">—</div>
+<div class="d" id="pOrigin">—</div></div>
+<div class="pcell"><div class="k">P50, selected horizon</div><div class="v" id="pP50">—</div>
+<div class="d" id="pChg">—</div></div>
+<div class="pcell"><div class="k">P10</div><div class="v" id="pP10">—</div>
+<div class="d">10th percentile</div></div>
+<div class="pcell"><div class="k">P90</div><div class="v" id="pP90">—</div>
+<div class="d">90th percentile</div></div>
+</div>
+<div class="chartbox"><canvas id="fcChart" height="118"></canvas></div>
+</section>
+
+<section class="panel c8">
+<div class="ph"><h2>Why: the note the buyer receives</h2><span class="sub">generated from the model outputs</span></div>
+<div class="notebox" id="noteTxt">—</div>
+<div class="note" id="landedTxt" style="display:none"></div>
+</section>
+
+<section class="panel c4">
+<div class="ph"><h2>What pushed the 3-month forecast</h2><span class="sub">SHAP, LightGBM + drivers</span></div>
+<div class="pb shapl" id="shapList"></div>
+<div class="note">TreeSHAP contributions to the predicted 3-month change, grouped by driver.
+They explain one member of the ensemble, not the ensemble itself.</div>
+</section>
+
+<section class="panel c4">
+<div class="ph"><h2>Purchase order</h2><span class="sub">Enter your numbers</span></div>
+<div class="pb">
+<div class="field"><label for="bom">Monthly BoM requirement (t)</label>
+<input id="bom" type="number" value="1000" min="0" step="50"></div>
+<div class="field"><label for="oh">On hand (t)</label>
+<input id="oh" type="number" value="600" min="0" step="50"></div>
+<div class="field"><label for="it">In transit (t)</label>
+<input id="it" type="number" value="400" min="0" step="50"></div>
+<div class="calcout">
+<div class="k">Order quantity</div>
+<div class="v" id="calcQty">—</div>
+<div class="f" id="calcFormula">—</div>
+</div>
+</div>
+<div class="note">Cover × BoM − on-hand − in-transit, floored at zero.
+The buyer decides; overrides are logged.</div>
+</section>
+
+<section class="panel c8">
+<div class="ph"><h2>Accuracy against the naïve forecast</h2>
+<span class="sub" id="scSub">—</span></div>
+<div class="tw"><table id="scTable">
+<thead><tr><th>Horizon</th><th class="r">n</th><th class="r">Model MAPE</th><th class="r">Naïve MAPE</th>
+<th class="r">Skill</th><th class="r">Direction</th><th class="r">DM p</th>
+<th class="r">Skill gate</th></tr></thead>
+<tbody></tbody></table></div>
+<div class="flag"><span>⚑</span><span id="scFlag">—</span></div>
+</section>
+
+<section class="panel c6">
+<div class="ph"><h2>What leads the price</h2>
+<span class="sub">Real series, 2000–2024, monthly log-returns</span></div>
+<div class="pb" id="drvList"></div>
+<div class="note">Bar = correlation at each driver's best lead (0–6 months).
+"Granger" = significant at a fixed 3-month lag after FDR correction (q &lt; 0.10).
+"Same month" relationships explain moves but cannot forecast them.</div>
+</section>
+
+<section class="panel c6">
+<div class="ph"><h2>Model ladder</h2>
+<span class="sub">h=3, development window</span></div>
+<div class="tw"><table id="ldTable">
+<thead><tr><th>Model</th><th class="r">MAPE</th><th class="r">Skill</th>
+<th class="r">Direction</th><th class="r">DM p</th><th class="r">Weight</th></tr></thead>
+<tbody></tbody></table></div>
+<div class="note" id="ldNote">—</div>
+</section>
+
+<section class="panel c7">
+<div class="ph"><h2>What the model actually did</h2>
+<span class="sub">Three-month-ahead forecast vs realised, every origin, with the 80% band</span></div>
+<div class="chartbox"><canvas id="btChart" height="150"></canvas></div>
+</section>
+
+<section class="panel c5">
+<div class="ph"><h2>By regime, and band calibration</h2><span class="sub">h=3</span></div>
+<div class="tw"><table id="rgTable">
+<thead><tr><th>Regime</th><th class="r">n</th><th class="r">MAPE</th>
+<th class="r">Skill</th><th class="r">Direction</th><th class="r">Coverage</th></tr></thead>
+<tbody></tbody></table></div>
+<div class="tw" style="border-top:1px solid var(--rule)"><table id="bdTable">
+<thead><tr><th>Horizon</th><th class="r">Coverage, calibrated</th><th class="r">Uncalibrated</th>
+<th class="r">Width</th><th class="r">Gate 75–85%</th></tr></thead>
+<tbody></tbody></table></div>
+<div class="flag"><span>⚑</span><span id="bdFlag">—</span></div>
+</section>
+
+<section class="panel c12">
+<div class="ph"><h2 id="rpTitle">Buying replay</h2>
+<span class="sub">Signal-driven cover vs buying the normal 1.5 months every month · execution at next month's price</span></div>
+<div class="kpis" id="rpKpis"></div>
+<div class="grid" style="padding:0;gap:0;border-top:1px solid var(--rule2)">
+<div class="c8" style="border-right:1px solid var(--rule2)">
+<div class="chartbox"><canvas id="rpChart" height="96"></canvas></div>
+</div>
+<div class="c4"><div class="pb" id="rpSignals"></div></div>
+</div>
+<div class="note" id="rpNote">—</div>
+</section>
+
+</div>
+</main>
+
+<footer class="foot">
+<b>Sources.</b> World Bank Commodity Price Data (Pink Sheet) · BLS producer price indices and
+Federal Reserve industrial production via FRED · BTS freight index via FRED · ECB reference rates ·
+Caldara &amp; Iacoviello Geopolitical Risk index · Baker, Bloom &amp; Davis Economic Policy Uncertainty ·
+OECD composite leading indicators. Public data only; no simulated series.<br>
+<b>Method.</b> Direct multi-horizon models on log-returns. Every feature carries its publication lag,
+and every training row is embargoed: its outcome must have been published before the forecast day.
+A future-perturbation test confirms no forecast changes when post-origin data is scrambled.
+Models earn ensemble weight only by beating naïve on their own realised past forecasts.
+Bands: split-conformal, scaled by a GARCH(1,1) volatility forecast; coverage reported as measured.
+Carrying cost of 1.0% per month is a placeholder pending ACG Finance inputs.<br>
+<b>Generated</b> <span id="genDate">—</span> from the pipeline outputs. No value on this page is typed by hand.
+</footer>
+
+<script id="payload" type="application/json">{
+ "materials": {
+  "aluminium": {
+   "name": "LME aluminium (World Bank monthly average)",
+   "short": "Aluminium",
+   "unit": "US$/t",
+   "cur": "$",
+   "spot": 2541.0,
+   "origin": "Dec 2024",
+   "stale": "Latest published price is Dec 2024. Refresh data/raw to forecast from today. These driver inputs are more than 3 months older than the forecast date and are treated as missing, so the driver models are running blind on them: OECD China leading indicator. Refresh data/raw (see SETUP.md).",
+   "note": "LME aluminium (World Bank monthly average): latest Dec 2024 = 2,541.0 US$/t. Three-month median forecast 2,551.1 (+0.4%), 80% range 2,249.6 to 2,893.0. Probability the price is higher: 52%. After 3% carrying cost, buying ahead now is worth -2.6% (threshold +/-2%, confidence 52% vs 60% needed): BUY NORMAL. Largest pushes in the tree model: copper (-1.4%), China leading indicator (+0.8%), own price momentum (-0.8%). Models currently trusted at this horizon: arima, lgb_local, lgb_global, nbeats. Caution: some driver inputs are stale (see warning).",
+   "shap": [
+    {
+     "driver": "copper",
+     "contribution_pct": -1.38
+    },
+    {
+     "driver": "China leading indicator",
+     "contribution_pct": 0.81
+    },
+    {
+     "driver": "own price momentum",
+     "contribution_pct": -0.79
+    },
+    {
+     "driver": "US sector output",
+     "contribution_pct": 0.38
+    },
+    {
+     "driver": "nickel",
+     "contribution_pct": 0.36
+    },
+    {
+     "driver": "zinc",
+     "contribution_pct": -0.26
+    },
+    {
+     "driver": "seasonality",
+     "contribution_pct": 0.24
+    },
+    {
+     "driver": "policy uncertainty",
+     "contribution_pct": 0.2
+    }
+   ],
+   "landed": {
+    "usd_inr_latest": 95.45,
+    "usd_inr_month": "Aug 2026",
+    "lme_in_inr_per_t": 242533.0,
+    "note": "Index converted at latest USD/INR only. Premium, freight, BCD, SWS and ADD to be calibrated on ACG POs."
+   },
+   "horizons": {
+    "1": {
+     "p50": 2539.0,
+     "p10": 2420.5,
+     "p90": 2663.2,
+     "change_pct": -0.08,
+     "p_up": 49.1,
+     "exp_saving_pct": -1.08,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "arima|enet|lgb_global|nbeats"
+    },
+    "2": {
+     "p50": 2553.3,
+     "p10": 2314.6,
+     "p90": 2816.7,
+     "change_pct": 0.48,
+     "p_up": 52.5,
+     "exp_saving_pct": -1.52,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "arima|enet|lgb_local|lgb_global|nbeats"
+    },
+    "3": {
+     "p50": 2551.1,
+     "p10": 2249.6,
+     "p90": 2893.0,
+     "change_pct": 0.4,
+     "p_up": 51.6,
+     "exp_saving_pct": -2.6,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "arima|lgb_local|lgb_global|nbeats"
+    },
+    "4": {
+     "p50": 2532.6,
+     "p10": 2207.1,
+     "p90": 2906.0,
+     "change_pct": -0.33,
+     "p_up": 48.8,
+     "exp_saving_pct": -4.33,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "ets|arima|lgb_local|lgb_global|nbeats"
+    },
+    "5": {
+     "p50": 2521.3,
+     "p10": 2159.5,
+     "p90": 2943.6,
+     "change_pct": -0.78,
+     "p_up": 47.4,
+     "exp_saving_pct": -5.78,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "ets|arima|lgb_local|lgb_global|nbeats"
+    },
+    "6": {
+     "p50": 2512.9,
+     "p10": 2089.1,
+     "p90": 3022.7,
+     "change_pct": -1.11,
+     "p_up": 46.9,
+     "exp_saving_pct": -7.11,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "ets|arima|lgb_local|lgb_global|nbeats"
+    }
+   },
+   "series": {
+    "labels": [
+     "Jan 22",
+     "Feb 22",
+     "Mar 22",
+     "Apr 22",
+     "May 22",
+     "Jun 22",
+     "Jul 22",
+     "Aug 22",
+     "Sep 22",
+     "Oct 22",
+     "Nov 22",
+     "Dec 22",
+     "Jan 23",
+     "Feb 23",
+     "Mar 23",
+     "Apr 23",
+     "May 23",
+     "Jun 23",
+     "Jul 23",
+     "Aug 23",
+     "Sep 23",
+     "Oct 23",
+     "Nov 23",
+     "Dec 23",
+     "Jan 24",
+     "Feb 24",
+     "Mar 24",
+     "Apr 24",
+     "May 24",
+     "Jun 24",
+     "Jul 24",
+     "Aug 24",
+     "Sep 24",
+     "Oct 24",
+     "Nov 24",
+     "Dec 24",
+     "Jan 25",
+     "Feb 25",
+     "Mar 25",
+     "Apr 25",
+     "May 25",
+     "Jun 25"
+    ],
+    "actual": [
+     3006.0,
+     3245.8,
+     3498.4,
+     3244.4,
+     2830.3,
+     2563.4,
+     2408.4,
+     2430.8,
+     2224.8,
+     2255.5,
+     2350.7,
+     2401.7,
+     2501.8,
+     2416.2,
+     2296.4,
+     2343.2,
+     2268.6,
+     2184.7,
+     2159.7,
+     2136.6,
+     2184.7,
+     2192.2,
+     2202.3,
+     2182.4,
+     2192.8,
+     2179.5,
+     2226.2,
+     2506.1,
+     2564.5,
+     2497.6,
+     2349.1,
+     2343.7,
+     2449.9,
+     2595.6,
+     2582.2,
+     2541.0,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "p50": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     2541.0,
+     2539.0,
+     2553.3,
+     2551.1,
+     2532.6,
+     2521.3,
+     2512.9
+    ],
+    "p10": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     2541.0,
+     2420.5,
+     2314.6,
+     2249.6,
+     2207.1,
+     2159.5,
+     2089.1
+    ],
+    "p90": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     2541.0,
+     2663.2,
+     2816.7,
+     2893.0,
+     2906.0,
+     2943.6,
+     3022.7
+    ],
+    "naive": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     2541.0,
+     2541.0,
+     2541.0,
+     2541.0,
+     2541.0,
+     2541.0,
+     2541.0
+    ]
+   },
+   "backtest": {
+    "labels": [
+     "Apr 18",
+     "May 18",
+     "Jun 18",
+     "Jul 18",
+     "Aug 18",
+     "Sep 18",
+     "Oct 18",
+     "Nov 18",
+     "Dec 18",
+     "Jan 19",
+     "Feb 19",
+     "Mar 19",
+     "Apr 19",
+     "May 19",
+     "Jun 19",
+     "Jul 19",
+     "Aug 19",
+     "Sep 19",
+     "Oct 19",
+     "Nov 19",
+     "Dec 19",
+     "Jan 20",
+     "Feb 20",
+     "Mar 20",
+     "Apr 20",
+     "May 20",
+     "Jun 20",
+     "Jul 20",
+     "Aug 20",
+     "Sep 20",
+     "Oct 20",
+     "Nov 20",
+     "Dec 20",
+     "Jan 21",
+     "Feb 21",
+     "Mar 21",
+     "Apr 21",
+     "May 21",
+     "Jun 21",
+     "Jul 21",
+     "Aug 21",
+     "Sep 21",
+     "Oct 21",
+     "Nov 21",
+     "Dec 21",
+     "Jan 22",
+     "Feb 22",
+     "Mar 22",
+     "Apr 22",
+     "May 22",
+     "Jun 22",
+     "Jul 22",
+     "Aug 22",
+     "Sep 22",
+     "Oct 22",
+     "Nov 22",
+     "Dec 22",
+     "Jan 23",
+     "Feb 23",
+     "Mar 23",
+     "Apr 23",
+     "May 23",
+     "Jun 23",
+     "Jul 23",
+     "Aug 23",
+     "Sep 23",
+     "Oct 23",
+     "Nov 23",
+     "Dec 23",
+     "Jan 24",
+     "Feb 24",
+     "Mar 24",
+     "Apr 24",
+     "May 24",
+     "Jun 24",
+     "Jul 24",
+     "Aug 24",
+     "Sep 24",
+     "Oct 24",
+     "Nov 24",
+     "Dec 24"
+    ],
+    "actual": [
+     2254.7,
+     2299.7,
+     2237.6,
+     2082.2,
+     2051.5,
+     2026.5,
+     2029.9,
+     1938.5,
+     1920.4,
+     1853.7,
+     1863.0,
+     1871.2,
+     1845.4,
+     1781.3,
+     1756.0,
+     1797.0,
+     1740.7,
+     1753.5,
+     1726.0,
+     1774.8,
+     1771.4,
+     1773.1,
+     1688.1,
+     1610.9,
+     1459.9,
+     1466.4,
+     1568.6,
+     1643.8,
+     1737.3,
+     1743.8,
+     1806.1,
+     1935.3,
+     2014.7,
+     2004.0,
+     2078.6,
+     2190.5,
+     2319.4,
+     2433.5,
+     2446.7,
+     2497.6,
+     2603.0,
+     2834.6,
+     2934.4,
+     2636.5,
+     2695.5,
+     3006.0,
+     3245.8,
+     3498.4,
+     3244.4,
+     2830.3,
+     2563.4,
+     2408.4,
+     2430.8,
+     2224.8,
+     2255.5,
+     2350.7,
+     2401.7,
+     2501.8,
+     2416.2,
+     2296.4,
+     2343.2,
+     2268.6,
+     2184.8,
+     2159.7,
+     2136.6,
+     2184.7,
+     2192.2,
+     2202.3,
+     2182.4,
+     2192.8,
+     2179.5,
+     2226.2,
+     2506.1,
+     2564.5,
+     2497.6,
+     2349.1,
+     2343.7,
+     2449.9,
+     2595.6,
+     2582.2,
+     2541.0
+    ],
+    "pred": [
+     2274.9,
+     2196.4,
+     2025.7,
+     2313.2,
+     2335.7,
+     2241.6,
+     2033.3,
+     2020.3,
+     1994.1,
+     2014.4,
+     1920.4,
+     1914.5,
+     1838.1,
+     1863.8,
+     1869.5,
+     1839.6,
+     1768.6,
+     1756.9,
+     1813.3,
+     1734.0,
+     1761.1,
+     1726.5,
+     1790.1,
+     1786.1,
+     1780.4,
+     1688.6,
+     1587.7,
+     1426.3,
+     1469.1,
+     1586.8,
+     1674.5,
+     1776.3,
+     1773.6,
+     1839.6,
+     1976.9,
+     2074.7,
+     2037.3,
+     2126.3,
+     2251.7,
+     2410.7,
+     2529.1,
+     2487.2,
+     2547.6,
+     2656.9,
+     2978.5,
+     3083.7,
+     2588.1,
+     2718.9,
+     3095.8,
+     3332.0,
+     3602.9,
+     3224.2,
+     2730.3,
+     2480.2,
+     2358.5,
+     2379.3,
+     2127.0,
+     2240.4,
+     2381.4,
+     2411.5,
+     2549.8,
+     2371.0,
+     2241.0,
+     2340.6,
+     2248.1,
+     2177.2,
+     2171.9,
+     2147.2,
+     2219.6,
+     2215.6,
+     2216.9,
+     2177.6,
+     2198.0,
+     2173.2,
+     2247.2,
+     2556.2,
+     2621.9,
+     2515.8,
+     2342.2,
+     2348.5,
+     2470.7
+    ],
+    "p10": [
+     2141.6,
+     2069.4,
+     1899.2,
+     2153.3,
+     2174.5,
+     2085.8,
+     1878.1,
+     1841.7,
+     1798.0,
+     1819.0,
+     1758.1,
+     1754.6,
+     1684.0,
+     1709.0,
+     1716.0,
+     1699.9,
+     1633.5,
+     1623.6,
+     1681.0,
+     1607.0,
+     1642.7,
+     1611.1,
+     1674.9,
+     1673.2,
+     1679.4,
+     1589.3,
+     1484.8,
+     1312.8,
+     1344.9,
+     1447.2,
+     1518.6,
+     1582.5,
+     1583.3,
+     1643.6,
+     1755.4,
+     1844.3,
+     1818.4,
+     1908.3,
+     2018.7,
+     2148.7,
+     2254.3,
+     2219.5,
+     2274.9,
+     2372.8,
+     2637.4,
+     2731.6,
+     2191.2,
+     2344.0,
+     2557.7,
+     2730.1,
+     2962.5,
+     2632.7,
+     2096.0,
+     1873.8,
+     1812.7,
+     1915.8,
+     1685.5,
+     1839.9,
+     1988.3,
+     2064.6,
+     2210.5,
+     2060.7,
+     1930.2,
+     2045.0,
+     1968.8,
+     1907.8,
+     1924.1,
+     1915.9,
+     1985.1,
+     1993.6,
+     2014.0,
+     1984.2,
+     2012.5,
+     1997.1,
+     2058.8,
+     2111.8,
+     2225.4,
+     2163.4,
+     1991.9,
+     2037.1,
+     2148.9
+    ],
+    "p90": [
+     2416.6,
+     2331.3,
+     2160.8,
+     2485.0,
+     2508.9,
+     2409.0,
+     2201.3,
+     2216.2,
+     2211.7,
+     2230.7,
+     2097.8,
+     2088.9,
+     2006.3,
+     2032.6,
+     2036.7,
+     1990.7,
+     1914.8,
+     1901.3,
+     1956.1,
+     1871.0,
+     1888.0,
+     1850.1,
+     1913.2,
+     1906.7,
+     1887.5,
+     1794.0,
+     1697.7,
+     1549.5,
+     1604.7,
+     1739.9,
+     1846.4,
+     1993.8,
+     1986.9,
+     2059.0,
+     2226.2,
+     2333.9,
+     2282.5,
+     2369.3,
+     2511.7,
+     2704.8,
+     2837.4,
+     2787.0,
+     2853.1,
+     2974.9,
+     3363.7,
+     3481.2,
+     3057.0,
+     3153.7,
+     3747.3,
+     4066.6,
+     4381.6,
+     3948.6,
+     3556.5,
+     3282.8,
+     3068.6,
+     2955.0,
+     2684.0,
+     2728.2,
+     2852.1,
+     2816.7,
+     2941.2,
+     2728.1,
+     2601.9,
+     2678.9,
+     2567.0,
+     2484.7,
+     2451.7,
+     2406.5,
+     2481.7,
+     2462.4,
+     2440.2,
+     2389.8,
+     2400.7,
+     2364.8,
+     2452.9,
+     3094.1,
+     3089.1,
+     2925.5,
+     2754.1,
+     2707.4,
+     2840.8
+    ]
+   },
+   "scorecard": [
+    {
+     "window": "development",
+     "h": 1,
+     "n": 78,
+     "ens": 3.73,
+     "naive": 3.79,
+     "skill": 1.5,
+     "dir": 51.3,
+     "dm_p": 0.2881,
+     "gate_skill": 10,
+     "gate_dir": 65
+    },
+    {
+     "window": "development",
+     "h": 2,
+     "n": 78,
+     "ens": 6.13,
+     "naive": 6.37,
+     "skill": 3.8,
+     "dir": 53.8,
+     "dm_p": 0.1583,
+     "gate_skill": 12,
+     "gate_dir": 63
+    },
+    {
+     "window": "development",
+     "h": 3,
+     "n": 78,
+     "ens": 7.87,
+     "naive": 8.19,
+     "skill": 3.9,
+     "dir": 64.1,
+     "dm_p": 0.1419,
+     "gate_skill": 15,
+     "gate_dir": 62
+    },
+    {
+     "window": "development",
+     "h": 4,
+     "n": 78,
+     "ens": 8.98,
+     "naive": 9.44,
+     "skill": 4.9,
+     "dir": 64.1,
+     "dm_p": 0.1147,
+     "gate_skill": 12,
+     "gate_dir": 60
+    },
+    {
+     "window": "development",
+     "h": 5,
+     "n": 78,
+     "ens": 10.15,
+     "naive": 10.59,
+     "skill": 4.2,
+     "dir": 57.7,
+     "dm_p": 0.1618,
+     "gate_skill": 10,
+     "gate_dir": 59
+    },
+    {
+     "window": "development",
+     "h": 6,
+     "n": 78,
+     "ens": 11.22,
+     "naive": 11.74,
+     "skill": 4.4,
+     "dir": 62.8,
+     "dm_p": 0.1298,
+     "gate_skill": 10,
+     "gate_dir": 58
+    }
+   ],
+   "ladder": [
+    {
+     "model": "N-BEATS, global panel",
+     "key": "nbeats",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 7.53,
+     "skill": 8.1,
+     "dir": 65.4,
+     "dm_p": 0.0847,
+     "weight": 19.7
+    },
+    {
+     "model": "LightGBM + drivers",
+     "key": "lgb_local",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 7.71,
+     "skill": 5.9,
+     "dir": 66.7,
+     "dm_p": 0.1047,
+     "weight": 19.7
+    },
+    {
+     "model": "LightGBM, global panel",
+     "key": "lgb_global",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 7.76,
+     "skill": 5.2,
+     "dir": 66.7,
+     "dm_p": 0.1951,
+     "weight": 19.7
+    },
+    {
+     "model": "Smart Buy ensemble (headline)",
+     "key": "gated_equal_weight",
+     "is_ensemble": true,
+     "is_headline": true,
+     "mape": 7.87,
+     "skill": 3.9,
+     "dir": 64.1,
+     "dm_p": 0.1419,
+     "weight": null
+    },
+    {
+     "model": "Ensemble, inverse-MSE",
+     "key": "gated_inv_mse",
+     "is_ensemble": true,
+     "is_headline": false,
+     "mape": 7.87,
+     "skill": 3.9,
+     "dir": 64.1,
+     "dm_p": 0.1367,
+     "weight": null
+    },
+    {
+     "model": "Na\u00efve (no change)",
+     "key": "naive",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 8.19,
+     "skill": 0.0,
+     "dir": null,
+     "dm_p": null,
+     "weight": null
+    },
+    {
+     "model": "Average of all, no gate",
+     "key": "all_equal",
+     "is_ensemble": true,
+     "is_headline": false,
+     "mape": 8.21,
+     "skill": -0.2,
+     "dir": 59.0,
+     "dm_p": 0.527,
+     "weight": null
+    },
+    {
+     "model": "ARIMA",
+     "key": "arima",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 8.24,
+     "skill": -0.6,
+     "dir": 61.5,
+     "dm_p": 0.6029,
+     "weight": 19.7
+    },
+    {
+     "model": "VECM (cost drivers)",
+     "key": "vecm",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 8.31,
+     "skill": -1.5,
+     "dir": 60.3,
+     "dm_p": 0.5976,
+     "weight": 0.0
+    },
+    {
+     "model": "Drift",
+     "key": "drift",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 8.33,
+     "skill": -1.7,
+     "dir": 51.3,
+     "dm_p": 0.7034,
+     "weight": 0.0
+    },
+    {
+     "model": "ETS (damped)",
+     "key": "ets",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 8.44,
+     "skill": -3.1,
+     "dir": 44.9,
+     "dm_p": 0.7455,
+     "weight": 19.7
+    },
+    {
+     "model": "ElasticNet + drivers",
+     "key": "enet",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 8.57,
+     "skill": -4.7,
+     "dir": 62.8,
+     "dm_p": 0.7231,
+     "weight": 1.5
+    },
+    {
+     "model": "Seasonal na\u00efve",
+     "key": "seasonal_naive",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 12.85,
+     "skill": -56.9,
+     "dir": 47.4,
+     "dm_p": 1.0,
+     "weight": 0.0
+    }
+   ],
+   "fallback_pct": 0.0,
+   "err_corr": {
+    "mean_off_diag": 0.87,
+    "most_diversifying": "ElasticNet + drivers",
+    "its_mean_corr": 0.71
+   },
+   "drivers": [
+    {
+     "name": "LME copper (US$/t)",
+     "rho": 0.677,
+     "lead": 0,
+     "q": 0.0747,
+     "sig": true
+    },
+    {
+     "name": "LME zinc (US$/t)",
+     "rho": 0.632,
+     "lead": 0,
+     "q": 0.4908,
+     "sig": false
+    },
+    {
+     "name": "WB energy price index",
+     "rho": 0.458,
+     "lead": 0,
+     "q": 0.5148,
+     "sig": false
+    },
+    {
+     "name": "Brent crude (US$/bbl)",
+     "rho": 0.437,
+     "lead": 0,
+     "q": 0.492,
+     "sig": false
+    },
+    {
+     "name": "Australian thermal coal (US$/t)",
+     "rho": 0.356,
+     "lead": 0,
+     "q": 0.8271,
+     "sig": false
+    },
+    {
+     "name": "USD/INR",
+     "rho": -0.3,
+     "lead": 0,
+     "q": 0.3655,
+     "sig": false
+    },
+    {
+     "name": "US industrial production, total (INDPRO)",
+     "rho": 0.228,
+     "lead": 0,
+     "q": 0.8271,
+     "sig": false
+    },
+    {
+     "name": "OECD China leading indicator",
+     "rho": 0.2,
+     "lead": 2,
+     "q": 0.0192,
+     "sig": true
+    },
+    {
+     "name": "Global Economic Policy Uncertainty",
+     "rho": -0.162,
+     "lead": 0,
+     "q": 0.6332,
+     "sig": false
+    },
+    {
+     "name": "US freight transportation services index (TSIFRGHT)",
+     "rho": 0.153,
+     "lead": 1,
+     "q": 0.5757,
+     "sig": false
+    }
+   ],
+   "bands": [
+    {
+     "window": "development",
+     "h": 1,
+     "cov": 78.2,
+     "width": 10.8,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 2,
+     "cov": 73.1,
+     "width": 19.4,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 3,
+     "cov": 71.8,
+     "width": 24.0,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 4,
+     "cov": 71.8,
+     "width": 26.5,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 5,
+     "cov": 71.8,
+     "width": 31.2,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 6,
+     "cov": 70.5,
+     "width": 35.4,
+     "n": 78
+    }
+   ],
+   "bands_gauss": {
+    "1": 76.9,
+    "2": 65.4,
+    "3": 65.4,
+    "4": 64.1,
+    "5": 60.3,
+    "6": 57.7
+   },
+   "regimes": [
+    {
+     "name": "Calm",
+     "n": 24,
+     "mape": 4.83,
+     "skill": 1.1,
+     "dir": 58.3,
+     "cov": 79.2
+    },
+    {
+     "name": "Covid",
+     "n": 12,
+     "mape": 10.15,
+     "skill": 8.8,
+     "dir": 75.0,
+     "cov": 50.0
+    },
+    {
+     "name": "Spike",
+     "n": 18,
+     "mape": 13.41,
+     "skill": 5.8,
+     "dir": 77.8,
+     "cov": 55.6
+    },
+    {
+     "name": "Slide",
+     "n": 27,
+     "mape": 5.8,
+     "skill": -1.6,
+     "dir": 55.6,
+     "cov": 88.9
+    }
+   ],
+   "replay": {
+    "months": 78,
+    "signals": {
+     "BUY NORMAL": 72,
+     "DEFER": 4,
+     "BUY NOW": 2
+    },
+    "gross_price_saving_pct": -0.16,
+    "net_saving_after_carry_pct": -0.19,
+    "permutation_p_value": 0.826,
+    "random_timing_median_pct": -0.02,
+    "perfect_foresight_net_pct": 2.93,
+    "inventory_days_baseline": 45.7,
+    "inventory_days_smartbuy": 46.2,
+    "inventory_days_change": 0.6,
+    "rupees_cr_saved_per_100cr_spend": -0.19,
+    "extra_working_capital_cr_per_100cr_spend": 0.16,
+    "curve": {
+     "labels": [
+      "Jan 18",
+      "Feb 18",
+      "Mar 18",
+      "Apr 18",
+      "May 18",
+      "Jun 18",
+      "Jul 18",
+      "Aug 18",
+      "Sep 18",
+      "Oct 18",
+      "Nov 18",
+      "Dec 18",
+      "Jan 19",
+      "Feb 19",
+      "Mar 19",
+      "Apr 19",
+      "May 19",
+      "Jun 19",
+      "Jul 19",
+      "Aug 19",
+      "Sep 19",
+      "Oct 19",
+      "Nov 19",
+      "Dec 19",
+      "Jan 20",
+      "Feb 20",
+      "Mar 20",
+      "Apr 20",
+      "May 20",
+      "Jun 20",
+      "Jul 20",
+      "Aug 20",
+      "Sep 20",
+      "Oct 20",
+      "Nov 20",
+      "Dec 20",
+      "Jan 21",
+      "Feb 21",
+      "Mar 21",
+      "Apr 21",
+      "May 21",
+      "Jun 21",
+      "Jul 21",
+      "Aug 21",
+      "Sep 21",
+      "Oct 21",
+      "Nov 21",
+      "Dec 21",
+      "Jan 22",
+      "Feb 22",
+      "Mar 22",
+      "Apr 22",
+      "May 22",
+      "Jun 22",
+      "Jul 22",
+      "Aug 22",
+      "Sep 22",
+      "Oct 22",
+      "Nov 22",
+      "Dec 22",
+      "Jan 23",
+      "Feb 23",
+      "Mar 23",
+      "Apr 23",
+      "May 23",
+      "Jun 23",
+      "Jul 23",
+      "Aug 23",
+      "Sep 23",
+      "Oct 23",
+      "Nov 23",
+      "Dec 23",
+      "Jan 24",
+      "Feb 24",
+      "Mar 24",
+      "Apr 24",
+      "May 24",
+      "Jun 24"
+     ],
+     "signal": [
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "DEFER",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "DEFER",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "DEFER",
+      "DEFER",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NOW",
+      "BUY NOW",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL"
+     ],
+     "price": [
+      2181.8,
+      2069.2,
+      2254.7,
+      2299.7,
+      2237.6,
+      2082.2,
+      2051.5,
+      2026.5,
+      2029.9,
+      1938.5,
+      1920.4,
+      1853.7,
+      1863.0,
+      1871.2,
+      1845.4,
+      1781.3,
+      1755.9,
+      1797.0,
+      1740.7,
+      1753.5,
+      1726.0,
+      1774.8,
+      1771.4,
+      1773.1,
+      1688.1,
+      1610.9,
+      1459.9,
+      1466.4,
+      1568.6,
+      1643.8,
+      1737.3,
+      1743.8,
+      1806.1,
+      1935.3,
+      2014.7,
+      2004.0,
+      2078.6,
+      2190.5,
+      2319.4,
+      2433.5,
+      2446.7,
+      2497.6,
+      2603.0,
+      2834.6,
+      2934.4,
+      2636.5,
+      2695.5,
+      3006.0,
+      3245.8,
+      3498.4,
+      3244.4,
+      2830.3,
+      2563.4,
+      2408.4,
+      2430.8,
+      2224.8,
+      2255.5,
+      2350.7,
+      2401.7,
+      2501.8,
+      2416.2,
+      2296.4,
+      2343.2,
+      2268.6,
+      2184.7,
+      2159.7,
+      2136.6,
+      2184.7,
+      2192.2,
+      2202.3,
+      2182.4,
+      2192.8,
+      2179.5,
+      2226.2,
+      2506.1,
+      2564.5,
+      2497.6,
+      2349.1
+     ]
+    },
+    "holdout": null
+   }
+  },
+  "pvc": {
+   "name": "US PPI, plastic resins & materials (BLS WPU066), PVC proxy",
+   "short": "PVC proxy",
+   "unit": "index (1982=100)",
+   "cur": "",
+   "spot": 280.6,
+   "origin": "Aug 2026",
+   "stale": "These driver inputs are more than 3 months older than the forecast date and are treated as missing, so the driver models are running blind on them: Brent crude (US$/bbl); OECD China leading indicator; US natural gas (US$/mmbtu); WB energy price index. Refresh data/raw (see SETUP.md).",
+   "note": "US PPI, plastic resins & materials (BLS WPU066), PVC proxy: latest Aug 2026 = 280.6 index (1982=100). Three-month median forecast 278.6 (-0.7%), 80% range 257.4 to 301.6. Probability the price is higher: 46%. After 3% carrying cost, buying ahead now is worth -3.7% (threshold +/-2%, confidence 54% vs 60% needed): BUY NORMAL. Largest pushes in the tree model: own price momentum (-0.4%), Brent crude (-0.3%), geopolitical risk (-0.3%). Models currently trusted at this horizon: enet, lgb_local, nbeats. Caution: some driver inputs are stale (see warning).",
+   "shap": [
+    {
+     "driver": "seasonality",
+     "contribution_pct": -1.13
+    },
+    {
+     "driver": "own price momentum",
+     "contribution_pct": -0.38
+    },
+    {
+     "driver": "Brent crude",
+     "contribution_pct": -0.34
+    },
+    {
+     "driver": "geopolitical risk",
+     "contribution_pct": -0.31
+    },
+    {
+     "driver": "China leading indicator",
+     "contribution_pct": -0.26
+    },
+    {
+     "driver": "energy index",
+     "contribution_pct": -0.16
+    },
+    {
+     "driver": "policy uncertainty",
+     "contribution_pct": -0.14
+    },
+    {
+     "driver": "US sector output",
+     "contribution_pct": -0.09
+    }
+   ],
+   "landed": null,
+   "horizons": {
+    "1": {
+     "p50": 279.3,
+     "p10": 271.0,
+     "p90": 287.8,
+     "change_pct": -0.47,
+     "p_up": 42.1,
+     "exp_saving_pct": -1.47,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "ets|arima|vecm|enet|lgb_local|lgb_global|nbeats"
+    },
+    "2": {
+     "p50": 278.3,
+     "p10": 263.3,
+     "p90": 294.1,
+     "change_pct": -0.81,
+     "p_up": 42.6,
+     "exp_saving_pct": -2.81,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "ets|arima|vecm|enet|lgb_local|lgb_global|nbeats"
+    },
+    "3": {
+     "p50": 278.6,
+     "p10": 257.4,
+     "p90": 301.6,
+     "change_pct": -0.69,
+     "p_up": 45.5,
+     "exp_saving_pct": -3.69,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "enet|lgb_local|nbeats"
+    },
+    "4": {
+     "p50": 280.2,
+     "p10": 251.9,
+     "p90": 311.7,
+     "change_pct": -0.13,
+     "p_up": 49.4,
+     "exp_saving_pct": -4.13,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "nbeats"
+    },
+    "5": {
+     "p50": 279.1,
+     "p10": 248.4,
+     "p90": 313.6,
+     "change_pct": -0.52,
+     "p_up": 47.7,
+     "exp_saving_pct": -5.52,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "arima|nbeats"
+    },
+    "6": {
+     "p50": 281.9,
+     "p10": 249.7,
+     "p90": 318.2,
+     "change_pct": 0.46,
+     "p_up": 51.9,
+     "exp_saving_pct": -5.54,
+     "signal": "BUY NORMAL",
+     "cover": 1.5,
+     "models": "nbeats"
+    }
+   },
+   "series": {
+    "labels": [
+     "Sep 23",
+     "Oct 23",
+     "Nov 23",
+     "Dec 23",
+     "Jan 24",
+     "Feb 24",
+     "Mar 24",
+     "Apr 24",
+     "May 24",
+     "Jun 24",
+     "Jul 24",
+     "Aug 24",
+     "Sep 24",
+     "Oct 24",
+     "Nov 24",
+     "Dec 24",
+     "Jan 25",
+     "Feb 25",
+     "Mar 25",
+     "Apr 25",
+     "May 25",
+     "Jun 25",
+     "Jul 25",
+     "Aug 25",
+     "Sep 25",
+     "Oct 25",
+     "Nov 25",
+     "Dec 25",
+     "Jan 26",
+     "Feb 26",
+     "Mar 26",
+     "Apr 26",
+     "May 26",
+     "Jun 26",
+     "Jul 26",
+     "Aug 26",
+     "Sep 26",
+     "Oct 26",
+     "Nov 26",
+     "Dec 26",
+     "Jan 27",
+     "Feb 27"
+    ],
+    "actual": [
+     267.3,
+     266.0,
+     266.5,
+     265.4,
+     262.3,
+     268.0,
+     265.4,
+     268.2,
+     267.9,
+     267.3,
+     271.5,
+     270.6,
+     263.9,
+     267.2,
+     265.3,
+     263.7,
+     262.7,
+     269.7,
+     272.4,
+     270.5,
+     267.3,
+     265.1,
+     264.6,
+     263.1,
+     259.4,
+     259.3,
+     257.3,
+     253.6,
+     253.0,
+     258.5,
+     263.5,
+     277.0,
+     306.6,
+     296.7,
+     283.3,
+     280.6,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "p50": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     280.6,
+     279.3,
+     278.3,
+     278.6,
+     280.2,
+     279.1,
+     281.9
+    ],
+    "p10": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     280.6,
+     271.0,
+     263.3,
+     257.4,
+     251.9,
+     248.4,
+     249.7
+    ],
+    "p90": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     280.6,
+     287.8,
+     294.1,
+     301.6,
+     311.7,
+     313.6,
+     318.2
+    ],
+    "naive": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     280.6,
+     280.6,
+     280.6,
+     280.6,
+     280.6,
+     280.6,
+     280.6
+    ]
+   },
+   "backtest": {
+    "labels": [
+     "Apr 18",
+     "May 18",
+     "Jun 18",
+     "Jul 18",
+     "Aug 18",
+     "Sep 18",
+     "Oct 18",
+     "Nov 18",
+     "Dec 18",
+     "Jan 19",
+     "Feb 19",
+     "Mar 19",
+     "Apr 19",
+     "May 19",
+     "Jun 19",
+     "Jul 19",
+     "Aug 19",
+     "Sep 19",
+     "Oct 19",
+     "Nov 19",
+     "Dec 19",
+     "Jan 20",
+     "Feb 20",
+     "Mar 20",
+     "Apr 20",
+     "May 20",
+     "Jun 20",
+     "Jul 20",
+     "Aug 20",
+     "Sep 20",
+     "Oct 20",
+     "Nov 20",
+     "Dec 20",
+     "Jan 21",
+     "Feb 21",
+     "Mar 21",
+     "Apr 21",
+     "May 21",
+     "Jun 21",
+     "Jul 21",
+     "Aug 21",
+     "Sep 21",
+     "Oct 21",
+     "Nov 21",
+     "Dec 21",
+     "Jan 22",
+     "Feb 22",
+     "Mar 22",
+     "Apr 22",
+     "May 22",
+     "Jun 22",
+     "Jul 22",
+     "Aug 22",
+     "Sep 22",
+     "Oct 22",
+     "Nov 22",
+     "Dec 22",
+     "Jan 23",
+     "Feb 23",
+     "Mar 23",
+     "Apr 23",
+     "May 23",
+     "Jun 23",
+     "Jul 23",
+     "Aug 23",
+     "Sep 23",
+     "Oct 23",
+     "Nov 23",
+     "Dec 23",
+     "Jan 24",
+     "Feb 24",
+     "Mar 24",
+     "Apr 24",
+     "May 24",
+     "Jun 24",
+     "Jul 24",
+     "Aug 24",
+     "Sep 24",
+     "Oct 24",
+     "Nov 24",
+     "Dec 24",
+     "Jan 25",
+     "Feb 25",
+     "Mar 25",
+     "Apr 25",
+     "May 25",
+     "Jun 25",
+     "Jul 25",
+     "Aug 25",
+     "Sep 25",
+     "Oct 25",
+     "Nov 25",
+     "Dec 25",
+     "Jan 26",
+     "Feb 26",
+     "Mar 26",
+     "Apr 26",
+     "May 26",
+     "Jun 26",
+     "Jul 26",
+     "Aug 26"
+    ],
+    "actual": [
+     238.3,
+     241.9,
+     243.8,
+     248.5,
+     252.3,
+     250.2,
+     251.2,
+     246.7,
+     242.4,
+     235.9,
+     230.8,
+     226.6,
+     225.0,
+     227.4,
+     223.9,
+     223.9,
+     224.7,
+     224.2,
+     224.6,
+     222.0,
+     217.3,
+     216.8,
+     220.9,
+     220.1,
+     207.9,
+     201.5,
+     202.4,
+     206.3,
+     212.1,
+     214.1,
+     223.7,
+     224.7,
+     229.7,
+     237.7,
+     249.9,
+     274.0,
+     289.7,
+     298.5,
+     311.4,
+     320.2,
+     326.9,
+     325.8,
+     326.7,
+     323.2,
+     313.8,
+     304.4,
+     304.6,
+     304.7,
+     316.9,
+     322.4,
+     326.3,
+     319.8,
+     309.9,
+     306.8,
+     299.7,
+     283.8,
+     280.4,
+     275.8,
+     282.0,
+     284.5,
+     289.1,
+     285.9,
+     280.4,
+     270.7,
+     267.6,
+     267.3,
+     266.0,
+     266.5,
+     265.4,
+     262.3,
+     268.0,
+     265.4,
+     268.2,
+     267.9,
+     267.3,
+     271.5,
+     270.6,
+     263.9,
+     267.2,
+     265.3,
+     263.7,
+     262.7,
+     269.7,
+     272.4,
+     270.5,
+     267.3,
+     265.1,
+     264.6,
+     263.1,
+     259.4,
+     259.3,
+     257.3,
+     253.6,
+     253.0,
+     258.5,
+     263.5,
+     277.0,
+     306.6,
+     296.7,
+     283.3,
+     280.6
+    ],
+    "pred": [
+     241.5,
+     238.0,
+     243.8,
+     238.7,
+     245.6,
+     245.9,
+     251.5,
+     253.5,
+     251.2,
+     253.2,
+     246.1,
+     240.7,
+     235.0,
+     230.8,
+     227.5,
+     226.7,
+     229.3,
+     222.7,
+     223.0,
+     222.4,
+     224.5,
+     224.3,
+     223.2,
+     217.1,
+     217.8,
+     217.9,
+     212.2,
+     195.3,
+     198.9,
+     205.1,
+     212.1,
+     218.3,
+     216.3,
+     227.8,
+     227.2,
+     236.5,
+     246.7,
+     263.4,
+     294.3,
+     305.9,
+     309.7,
+     329.3,
+     336.8,
+     338.2,
+     330.6,
+     333.2,
+     323.3,
+     307.1,
+     300.6,
+     308.2,
+     310.9,
+     327.3,
+     333.2,
+     332.1,
+     313.6,
+     297.2,
+     297.8,
+     290.1,
+     268.9,
+     273.1,
+     270.4,
+     284.1,
+     285.5,
+     293.7,
+     283.8,
+     277.1,
+     265.3,
+     267.0,
+     269.4,
+     266.5,
+     267.0,
+     264.6,
+     261.2,
+     273.0,
+     265.4,
+     272.6,
+     269.7,
+     269.6,
+     276.5,
+     270.3,
+     258.5,
+     268.4,
+     265.3,
+     265.2,
+     264.4,
+     275.9,
+     276.4,
+     271.2,
+     267.2,
+     264.8,
+     265.4,
+     262.5,
+     257.2,
+     259.2,
+     256.3,
+     251.4,
+     253.1,
+     263.3,
+     268.7,
+     288.6,
+     335.0
+    ],
+    "p10": [
+     233.3,
+     230.6,
+     236.2,
+     231.5,
+     238.2,
+     239.0,
+     244.0,
+     246.0,
+     243.9,
+     246.1,
+     238.2,
+     232.2,
+     224.0,
+     219.2,
+     215.4,
+     216.5,
+     219.8,
+     213.2,
+     214.6,
+     214.8,
+     217.7,
+     218.2,
+     216.5,
+     207.8,
+     210.2,
+     208.9,
+     205.1,
+     181.0,
+     186.1,
+     195.8,
+     202.5,
+     206.9,
+     206.8,
+     212.1,
+     214.5,
+     223.8,
+     231.3,
+     239.3,
+     242.8,
+     256.8,
+     269.7,
+     289.4,
+     303.1,
+     311.4,
+     311.6,
+     318.2,
+     308.4,
+     286.2,
+     277.3,
+     289.8,
+     296.3,
+     301.3,
+     309.7,
+     311.7,
+     293.9,
+     274.5,
+     278.3,
+     270.2,
+     236.8,
+     246.9,
+     247.7,
+     261.3,
+     266.2,
+     275.4,
+     268.0,
+     261.1,
+     245.5,
+     249.7,
+     254.3,
+     253.1,
+     254.2,
+     252.3,
+     248.8,
+     256.5,
+     250.9,
+     257.9,
+     256.1,
+     256.4,
+     261.2,
+     256.7,
+     243.3,
+     253.2,
+     251.8,
+     252.8,
+     252.7,
+     260.9,
+     262.0,
+     258.0,
+     254.4,
+     252.6,
+     254.6,
+     252.4,
+     246.8,
+     249.2,
+     246.5,
+     241.2,
+     243.5,
+     251.0,
+     255.3,
+     262.4,
+     270.5
+    ],
+    "p90": [
+     250.0,
+     245.7,
+     251.6,
+     246.2,
+     253.2,
+     253.1,
+     259.3,
+     261.3,
+     258.8,
+     260.5,
+     254.1,
+     249.5,
+     246.5,
+     243.0,
+     240.2,
+     237.4,
+     239.2,
+     232.6,
+     231.8,
+     230.3,
+     231.5,
+     230.5,
+     230.0,
+     226.8,
+     225.6,
+     227.3,
+     219.5,
+     210.8,
+     212.7,
+     214.9,
+     222.3,
+     230.4,
+     226.2,
+     244.7,
+     240.7,
+     250.0,
+     263.0,
+     290.0,
+     356.7,
+     364.4,
+     355.5,
+     374.6,
+     374.1,
+     367.3,
+     350.8,
+     348.8,
+     339.0,
+     329.5,
+     325.8,
+     327.7,
+     326.2,
+     355.6,
+     358.5,
+     353.8,
+     334.7,
+     321.9,
+     318.6,
+     311.5,
+     305.4,
+     302.0,
+     295.2,
+     308.8,
+     306.3,
+     313.3,
+     300.6,
+     294.0,
+     286.8,
+     285.5,
+     285.4,
+     280.7,
+     280.5,
+     277.4,
+     274.2,
+     290.5,
+     280.6,
+     288.1,
+     284.0,
+     283.4,
+     292.8,
+     284.6,
+     274.6,
+     284.5,
+     279.5,
+     278.3,
+     276.7,
+     291.8,
+     291.5,
+     285.2,
+     280.7,
+     277.6,
+     276.6,
+     273.0,
+     268.1,
+     269.6,
+     266.5,
+     262.0,
+     263.2,
+     276.3,
+     282.8,
+     317.4,
+     414.8
+    ]
+   },
+   "scorecard": [
+    {
+     "window": "development",
+     "h": 1,
+     "n": 78,
+     "ens": 1.4,
+     "naive": 1.78,
+     "skill": 21.4,
+     "dir": 71.4,
+     "dm_p": 0.0004,
+     "gate_skill": 10,
+     "gate_dir": 65
+    },
+    {
+     "window": "development",
+     "h": 2,
+     "n": 78,
+     "ens": 2.65,
+     "naive": 3.15,
+     "skill": 16.0,
+     "dir": 66.7,
+     "dm_p": 0.0286,
+     "gate_skill": 12,
+     "gate_dir": 63
+    },
+    {
+     "window": "development",
+     "h": 3,
+     "n": 78,
+     "ens": 3.94,
+     "naive": 4.37,
+     "skill": 10.0,
+     "dir": 61.5,
+     "dm_p": 0.1164,
+     "gate_skill": 15,
+     "gate_dir": 62
+    },
+    {
+     "window": "development",
+     "h": 4,
+     "n": 78,
+     "ens": 5.41,
+     "naive": 5.43,
+     "skill": 0.2,
+     "dir": 43.8,
+     "dm_p": 0.4896,
+     "gate_skill": 12,
+     "gate_dir": 60
+    },
+    {
+     "window": "development",
+     "h": 5,
+     "n": 78,
+     "ens": 6.16,
+     "naive": 6.25,
+     "skill": 1.4,
+     "dir": 52.6,
+     "dm_p": 0.4218,
+     "gate_skill": 10,
+     "gate_dir": 59
+    },
+    {
+     "window": "development",
+     "h": 6,
+     "n": 78,
+     "ens": 6.77,
+     "naive": 6.81,
+     "skill": 0.5,
+     "dir": 51.3,
+     "dm_p": 0.4733,
+     "gate_skill": 10,
+     "gate_dir": 58
+    },
+    {
+     "window": "holdout",
+     "h": 1,
+     "n": 19,
+     "ens": 2.0,
+     "naive": 2.03,
+     "skill": 1.7,
+     "dir": 78.9,
+     "dm_p": 0.4523,
+     "gate_skill": 10,
+     "gate_dir": 65
+    },
+    {
+     "window": "holdout",
+     "h": 2,
+     "n": 18,
+     "ens": 3.74,
+     "naive": 3.62,
+     "skill": -3.4,
+     "dir": 77.8,
+     "dm_p": 0.6302,
+     "gate_skill": 12,
+     "gate_dir": 63
+    },
+    {
+     "window": "holdout",
+     "h": 3,
+     "n": 17,
+     "ens": 4.88,
+     "naive": 4.3,
+     "skill": -13.7,
+     "dir": 58.8,
+     "dm_p": 0.8347,
+     "gate_skill": 15,
+     "gate_dir": 62
+    },
+    {
+     "window": "holdout",
+     "h": 4,
+     "n": 16,
+     "ens": 4.68,
+     "naive": 4.59,
+     "skill": -2.1,
+     "dir": 68.8,
+     "dm_p": 0.689,
+     "gate_skill": 12,
+     "gate_dir": 60
+    },
+    {
+     "window": "holdout",
+     "h": 5,
+     "n": 15,
+     "ens": 5.45,
+     "naive": 5.41,
+     "skill": -0.7,
+     "dir": 53.3,
+     "dm_p": 0.5425,
+     "gate_skill": 10,
+     "gate_dir": 59
+    },
+    {
+     "window": "holdout",
+     "h": 6,
+     "n": 14,
+     "ens": 6.39,
+     "naive": 6.04,
+     "skill": -5.8,
+     "dir": 28.6,
+     "dm_p": 0.9312,
+     "gate_skill": 10,
+     "gate_dir": 58
+    }
+   ],
+   "ladder": [
+    {
+     "model": "Smart Buy ensemble (headline)",
+     "key": "gated_equal_weight",
+     "is_ensemble": true,
+     "is_headline": true,
+     "mape": 3.94,
+     "skill": 10.0,
+     "dir": 61.5,
+     "dm_p": 0.1164,
+     "weight": null
+    },
+    {
+     "model": "Ensemble, inverse-MSE",
+     "key": "gated_inv_mse",
+     "is_ensemble": true,
+     "is_headline": false,
+     "mape": 3.95,
+     "skill": 9.8,
+     "dir": 62.8,
+     "dm_p": 0.1189,
+     "weight": null
+    },
+    {
+     "model": "N-BEATS, global panel",
+     "key": "nbeats",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 3.96,
+     "skill": 9.5,
+     "dir": 62.8,
+     "dm_p": 0.1098,
+     "weight": 7.4
+    },
+    {
+     "model": "ARIMA",
+     "key": "arima",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 4.06,
+     "skill": 7.1,
+     "dir": 66.7,
+     "dm_p": 0.2112,
+     "weight": 14.4
+    },
+    {
+     "model": "Average of all, no gate",
+     "key": "all_equal",
+     "is_ensemble": true,
+     "is_headline": false,
+     "mape": 4.06,
+     "skill": 7.3,
+     "dir": 67.9,
+     "dm_p": 0.1442,
+     "weight": null
+    },
+    {
+     "model": "VECM (cost drivers)",
+     "key": "vecm",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 4.08,
+     "skill": 6.8,
+     "dir": 61.5,
+     "dm_p": 0.2957,
+     "weight": 7.7
+    },
+    {
+     "model": "ETS (damped)",
+     "key": "ets",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 4.17,
+     "skill": 4.6,
+     "dir": 56.4,
+     "dm_p": 0.3624,
+     "weight": 18.1
+    },
+    {
+     "model": "ElasticNet + drivers",
+     "key": "enet",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 4.18,
+     "skill": 4.5,
+     "dir": 61.5,
+     "dm_p": 0.2907,
+     "weight": 24.1
+    },
+    {
+     "model": "LightGBM + drivers",
+     "key": "lgb_local",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 4.2,
+     "skill": 4.0,
+     "dir": 60.3,
+     "dm_p": 0.2734,
+     "weight": 21.7
+    },
+    {
+     "model": "LightGBM, global panel",
+     "key": "lgb_global",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 4.22,
+     "skill": 3.5,
+     "dir": 57.7,
+     "dm_p": 0.3266,
+     "weight": 6.0
+    },
+    {
+     "model": "Na\u00efve (no change)",
+     "key": "naive",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 4.37,
+     "skill": 0.0,
+     "dir": null,
+     "dm_p": null,
+     "weight": null
+    },
+    {
+     "model": "Drift",
+     "key": "drift",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 4.46,
+     "skill": -2.0,
+     "dir": 48.7,
+     "dm_p": 0.6794,
+     "weight": 0.6
+    },
+    {
+     "model": "Seasonal na\u00efve",
+     "key": "seasonal_naive",
+     "is_ensemble": false,
+     "is_headline": false,
+     "mape": 6.77,
+     "skill": -54.8,
+     "dir": 52.6,
+     "dm_p": 0.9983,
+     "weight": 0.0
+    }
+   ],
+   "fallback_pct": 0.0,
+   "err_corr": {
+    "mean_off_diag": 0.84,
+    "most_diversifying": "Seasonal na\u00efve",
+    "its_mean_corr": 0.68
+   },
+   "drivers": [
+    {
+     "name": "WB energy price index",
+     "rho": 0.442,
+     "lead": 1,
+     "q": 0.0,
+     "sig": true
+    },
+    {
+     "name": "Brent crude (US$/bbl)",
+     "rho": 0.411,
+     "lead": 1,
+     "q": 0.0,
+     "sig": true
+    },
+    {
+     "name": "US industrial production, total (INDPRO)",
+     "rho": 0.264,
+     "lead": 0,
+     "q": 0.6238,
+     "sig": false
+    },
+    {
+     "name": "USD/INR",
+     "rho": -0.232,
+     "lead": 1,
+     "q": 0.002,
+     "sig": true
+    },
+    {
+     "name": "PPI basic organic chemicals (WPU0613)",
+     "rho": -0.228,
+     "lead": 6,
+     "q": 0.6256,
+     "sig": false
+    },
+    {
+     "name": "US natural gas (US$/mmbtu)",
+     "rho": 0.217,
+     "lead": 2,
+     "q": 0.0001,
+     "sig": true
+    },
+    {
+     "name": "US freight transportation services index (TSIFRGHT)",
+     "rho": 0.207,
+     "lead": 0,
+     "q": 0.3685,
+     "sig": false
+    },
+    {
+     "name": "US industrial production: resins (IPG3252N)",
+     "rho": 0.179,
+     "lead": 0,
+     "q": 0.1619,
+     "sig": false
+    },
+    {
+     "name": "OECD China leading indicator",
+     "rho": 0.178,
+     "lead": 2,
+     "q": 0.0036,
+     "sig": true
+    },
+    {
+     "name": "Geopolitical Risk index",
+     "rho": 0.11,
+     "lead": 2,
+     "q": 0.1959,
+     "sig": false
+    }
+   ],
+   "bands": [
+    {
+     "window": "development",
+     "h": 1,
+     "cov": 76.9,
+     "width": 4.8,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 2,
+     "cov": 74.4,
+     "width": 9.6,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 3,
+     "cov": 71.8,
+     "width": 12.2,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 4,
+     "cov": 67.9,
+     "width": 16.3,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 5,
+     "cov": 66.7,
+     "width": 18.2,
+     "n": 78
+    },
+    {
+     "window": "development",
+     "h": 6,
+     "cov": 67.9,
+     "width": 20.9,
+     "n": 78
+    },
+    {
+     "window": "holdout",
+     "h": 1,
+     "cov": 78.9,
+     "width": 5.4,
+     "n": 19
+    },
+    {
+     "window": "holdout",
+     "h": 2,
+     "cov": 77.8,
+     "width": 9.4,
+     "n": 18
+    },
+    {
+     "window": "holdout",
+     "h": 3,
+     "cov": 76.5,
+     "width": 12.0,
+     "n": 17
+    },
+    {
+     "window": "holdout",
+     "h": 4,
+     "cov": 81.2,
+     "width": 13.8,
+     "n": 16
+    },
+    {
+     "window": "holdout",
+     "h": 5,
+     "cov": 73.3,
+     "width": 14.1,
+     "n": 15
+    },
+    {
+     "window": "holdout",
+     "h": 6,
+     "cov": 78.6,
+     "width": 15.4,
+     "n": 14
+    }
+   ],
+   "bands_gauss": {
+    "1": 82.1,
+    "2": 71.8,
+    "3": 61.5,
+    "4": 60.3,
+    "5": 57.7,
+    "6": 56.4
+   },
+   "regimes": [
+    {
+     "name": "Calm",
+     "n": 24,
+     "mape": 2.48,
+     "skill": 4.3,
+     "dir": 54.2,
+     "cov": 70.8
+    },
+    {
+     "name": "Covid",
+     "n": 12,
+     "mape": 6.18,
+     "skill": 13.9,
+     "dir": 83.3,
+     "cov": 41.7
+    },
+    {
+     "name": "Spike",
+     "n": 18,
+     "mape": 5.81,
+     "skill": 12.5,
+     "dir": 61.1,
+     "cov": 66.7
+    },
+    {
+     "name": "Slide",
+     "n": 30,
+     "mape": 2.76,
+     "skill": 1.0,
+     "dir": 60.0,
+     "cov": 93.3
+    },
+    {
+     "name": "Holdout",
+     "n": 12,
+     "mape": 2.47,
+     "skill": -14.2,
+     "dir": 50.0,
+     "cov": 91.7
+    }
+   ],
+   "replay": {
+    "months": 78,
+    "signals": {
+     "BUY NORMAL": 59,
+     "DEFER": 14,
+     "BUY NOW": 5
+    },
+    "gross_price_saving_pct": 0.45,
+    "net_saving_after_carry_pct": 0.41,
+    "permutation_p_value": 0.003,
+    "random_timing_median_pct": -0.03,
+    "perfect_foresight_net_pct": 1.31,
+    "inventory_days_baseline": 45.7,
+    "inventory_days_smartbuy": 46.2,
+    "inventory_days_change": 0.6,
+    "rupees_cr_saved_per_100cr_spend": 0.41,
+    "extra_working_capital_cr_per_100cr_spend": 0.16,
+    "curve": {
+     "labels": [
+      "Jan 18",
+      "Feb 18",
+      "Mar 18",
+      "Apr 18",
+      "May 18",
+      "Jun 18",
+      "Jul 18",
+      "Aug 18",
+      "Sep 18",
+      "Oct 18",
+      "Nov 18",
+      "Dec 18",
+      "Jan 19",
+      "Feb 19",
+      "Mar 19",
+      "Apr 19",
+      "May 19",
+      "Jun 19",
+      "Jul 19",
+      "Aug 19",
+      "Sep 19",
+      "Oct 19",
+      "Nov 19",
+      "Dec 19",
+      "Jan 20",
+      "Feb 20",
+      "Mar 20",
+      "Apr 20",
+      "May 20",
+      "Jun 20",
+      "Jul 20",
+      "Aug 20",
+      "Sep 20",
+      "Oct 20",
+      "Nov 20",
+      "Dec 20",
+      "Jan 21",
+      "Feb 21",
+      "Mar 21",
+      "Apr 21",
+      "May 21",
+      "Jun 21",
+      "Jul 21",
+      "Aug 21",
+      "Sep 21",
+      "Oct 21",
+      "Nov 21",
+      "Dec 21",
+      "Jan 22",
+      "Feb 22",
+      "Mar 22",
+      "Apr 22",
+      "May 22",
+      "Jun 22",
+      "Jul 22",
+      "Aug 22",
+      "Sep 22",
+      "Oct 22",
+      "Nov 22",
+      "Dec 22",
+      "Jan 23",
+      "Feb 23",
+      "Mar 23",
+      "Apr 23",
+      "May 23",
+      "Jun 23",
+      "Jul 23",
+      "Aug 23",
+      "Sep 23",
+      "Oct 23",
+      "Nov 23",
+      "Dec 23",
+      "Jan 24",
+      "Feb 24",
+      "Mar 24",
+      "Apr 24",
+      "May 24",
+      "Jun 24"
+     ],
+     "signal": [
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "DEFER",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "DEFER",
+      "DEFER",
+      "DEFER",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NOW",
+      "BUY NOW",
+      "BUY NOW",
+      "BUY NORMAL",
+      "BUY NOW",
+      "BUY NOW",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "DEFER",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "DEFER",
+      "DEFER",
+      "DEFER",
+      "DEFER",
+      "DEFER",
+      "DEFER",
+      "DEFER",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "DEFER",
+      "DEFER",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL",
+      "BUY NORMAL"
+     ],
+     "price": [
+      236.4,
+      240.3,
+      238.3,
+      241.9,
+      243.8,
+      248.5,
+      252.3,
+      250.2,
+      251.2,
+      246.7,
+      242.4,
+      235.9,
+      230.8,
+      226.6,
+      225.0,
+      227.4,
+      223.9,
+      223.9,
+      224.7,
+      224.2,
+      224.6,
+      222.0,
+      217.3,
+      216.8,
+      220.9,
+      220.1,
+      207.9,
+      201.5,
+      202.4,
+      206.3,
+      212.1,
+      214.1,
+      223.7,
+      224.7,
+      229.7,
+      237.7,
+      249.9,
+      274.0,
+      289.7,
+      298.5,
+      311.4,
+      320.2,
+      326.9,
+      325.8,
+      326.7,
+      323.2,
+      313.8,
+      304.4,
+      304.6,
+      304.7,
+      316.9,
+      322.4,
+      326.3,
+      319.8,
+      309.9,
+      306.8,
+      299.7,
+      283.8,
+      280.4,
+      275.8,
+      282.0,
+      284.5,
+      289.1,
+      285.9,
+      280.4,
+      270.7,
+      267.6,
+      267.3,
+      266.0,
+      266.5,
+      265.4,
+      262.3,
+      268.0,
+      265.4,
+      268.2,
+      267.9,
+      267.3,
+      271.5
+     ]
+    },
+    "holdout": {
+     "months": 17,
+     "signals": {
+      "BUY NORMAL": 14,
+      "DEFER": 2,
+      "BUY NOW": 1
+     },
+     "gross_price_saving_pct": -0.9,
+     "net_saving_after_carry_pct": -0.08,
+     "permutation_p_value": 0.439,
+     "random_timing_median_pct": -0.11,
+     "perfect_foresight_net_pct": 1.67,
+     "inventory_days_baseline": 45.7,
+     "inventory_days_smartbuy": 46.6,
+     "inventory_days_change": 0.9,
+     "rupees_cr_saved_per_100cr_spend": -0.08,
+     "extra_working_capital_cr_per_100cr_spend": 0.25
+    }
+   }
+  }
+ },
+ "hypotheses": {
+  "H1": {
+   "hypothesis": "China coal and LME stocks lead aluminium by 1-3 months.",
+   "coal (Australian thermal, proxy)": "best lead 0m, rho=+0.36; Granger(3) p=0.724, FDR q=0.827 -> NOT SUPPORTED",
+   "LME stocks": "NOT TESTABLE: no free historical LME stock series. The Round 2 'stocks' series was computed from the aluminium price itself.",
+   "verdict": "NOT SUPPORTED (coal only; stocks not testable)"
+  },
+  "H2": {
+   "hypothesis": "Ethylene/VCM and China export offers lead PVC by 1-2 months.",
+   "monomers (US PPI basic organic chemicals, proxy)": "best lead 6m, rho=-0.23; Granger(3) p=0.465, FDR q=0.626 -> NOT SUPPORTED",
+   "Brent crude": "best lead 1m, rho=+0.41; Granger(3) p=0.000, FDR q=0.000 -> SUPPORTED",
+   "China export offers": "NOT TESTABLE with free data. The Round 2 'exports' series was the PVC price lagged two months.",
+   "verdict": "PARTIAL (monomer proxy: NOT SUPPORTED; Brent: SUPPORTED; exports not testable)"
+  },
+  "H3": {
+   "hypothesis": "Manufacturing activity leads both materials by 0-2 months.",
+   "aluminium vs OECD China CLI": "best lead 2m, rho=+0.20; Granger(3) p=0.005, FDR q=0.019 -> SUPPORTED",
+   "aluminium vs US industrial production": "best lead 0m, rho=+0.23; Granger(3) p=0.698, FDR q=0.827 -> PARTIAL",
+   "PVC vs OECD China CLI": "best lead 2m, rho=+0.18; Granger(3) p=0.001, FDR q=0.004 -> SUPPORTED",
+   "PVC vs US industrial production": "best lead 0m, rho=+0.26; Granger(3) p=0.416, FDR q=0.624 -> PARTIAL",
+   "note": "PMIs are paywalled; the OECD China CLI and US industrial production are free activity proxies.",
+   "verdict": "see per-row verdicts"
+  },
+  "H4": {
+   "hypothesis": "USD/INR moves the landed (rupee) price in the same month.",
+   "share of monthly rupee-price variance due to USD/INR, aluminium": "1.3%",
+   "share of monthly rupee-price variance due to USD/INR, PVC proxy": "35.8%",
+   "does USD/INR forecast the US$ price? aluminium": "best lead 0m, rho=-0.30; Granger(3) p=0.152, FDR q=0.365",
+   "does USD/INR forecast the US$ price? PVC": "best lead 1m, rho=-0.23; Granger(3) p=0.000, FDR q=0.002",
+   "verdict": "PARTIAL. Pass-through is one-for-one by construction (rupee price = US$ price x USD/INR), but USD/INR explains only 1% of aluminium's monthly rupee-price variance (the US$ price dominates) and 36% for the less volatile PVC index. Handle FX in the landed-cost overlay; as a predictor of the US$ price it is significant for PVC and not significant for aluminium."
+  },
+  "extra": {
+   "copper -> aluminium": "best lead 0m, rho=+0.68; Granger(3) p=0.022, FDR q=0.075"
+  }
+ },
+ "generated": "04 Oct 2026"
+}</script>
+<script>
+const D = JSON.parse(document.getElementById('payload').textContent);
+let MAT = 'aluminium', H = 3, fcChart, btChart, rpChart;
+const $ = id => document.getElementById(id);
+const fmt = (v,d=0) => v==null?'—':v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct = (v,d=1) => v==null?'—':(v>0?'+':'') + v.toFixed(d) + '%';
+const CSS = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+const P = (m,v) => m.cur + fmt(v, m.cur ? 0 : 1);
+
+$('hSeg').innerHTML = [1,2,3,4,5,6].map(h =>
+  `<button data-h="${h}" aria-pressed="${h===3}">${h}M</button>`).join('');
+$('hSeg').onclick = e => { const b=e.target.closest('button'); if(!b) return; H = +b.dataset.h; render(); };
+$('matSeg').onclick = e => { const b=e.target.closest('button'); if(!b) return; MAT = b.dataset.mat; render(); };
+$('genDate').textContent = D.generated;
+
+function render(){
+  const m = D.materials[MAT], hz = m.horizons[H];
+  document.querySelectorAll('#matSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mat===MAT));
+  document.querySelectorAll('#hSeg button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.h===H));
+  const dev = m.scorecard.filter(r=>r.window==='development'&&r.h===3)[0];
+  $('mOrigin').textContent = m.origin;
+  $('mFolds').textContent = (dev?dev.n:'—') + ' scored origins, 2018–2024' + (m.scorecard.some(r=>r.window==='holdout')?' + 2025–26 holdout':'');
+  $('fcTitle').textContent = m.name;
+  $('fcSub').textContent = m.unit + ' · 80% band (P10–P90)';
+  $('decH').textContent = H + (H===1?' month ahead':' months ahead');
+  $('staleBox').style.display = m.stale ? '' : 'none';
+  $('staleTxt').innerHTML = '<b>Data needs refreshing.</b> ' + m.stale;
+
+  const cls = hz.signal==='BUY NOW'?'buy':hz.signal==='DEFER'?'defer':'hold';
+  $('decBand').className = 'decband ' + cls; $('decSig').className = 'decsig ' + cls;
+  $('decSig').textContent = hz.signal;
+  $('decSub').textContent = hz.signal==='BUY NOW'
+    ? `Forward-cover ${hz.cover.toFixed(1)} months. Expected rise beats the cost of carry.`
+    : hz.signal==='DEFER' ? `Minimum safety cover ${hz.cover.toFixed(1)} month. Re-run next month.`
+    : `Buy the BoM requirement, ${hz.cover.toFixed(1)} months cover. No timing bet.`;
+  $('decSav').textContent = pct(hz.exp_saving_pct,2);
+  $('decSav').className = 'v ' + (hz.exp_saving_pct>0?'pos':'neg');
+  $('decPup').textContent = hz.p_up.toFixed(1) + '%';
+  $('decCov').textContent = hz.cover.toFixed(1) + ' mo';
+  $('decBandR').textContent = P(m,hz.p10) + ' – ' + P(m,hz.p90);
+  $('decModels').textContent = hz.models ? hz.models.split('|').join(', ') : 'none: naïve fallback';
+
+  $('pSpot').textContent = P(m,m.spot); $('pOrigin').textContent = 'as of ' + m.origin;
+  $('pP50').textContent = P(m,hz.p50); $('pChg').textContent = pct(hz.change_pct,2) + ' vs latest';
+  $('pChg').style.color = hz.change_pct>0 ? CSS('--buy') : CSS('--acg');
+  $('pP10').textContent = P(m,hz.p10); $('pP90').textContent = P(m,hz.p90);
+
+  $('noteTxt').textContent = m.note;
+  if (m.landed){ $('landedTxt').style.display='';
+    $('landedTxt').innerHTML = `<b>Rupee view.</b> At USD/INR ${m.landed.usd_inr_latest} (${m.landed.usd_inr_month}) the latest LME price is ₹${fmt(m.landed.lme_in_inr_per_t)}/t before premium, freight and duties. ${m.landed.note}`;
+  } else $('landedTxt').style.display='none';
+  const mx = Math.max(...m.shap.map(s=>Math.abs(s.contribution_pct)), 0.01);
+  $('shapList').innerHTML = m.shap.map(s=>`<div class="dr"><div class="n">${s.driver}</div>
+    <div class="l num">${pct(s.contribution_pct,2)}</div>
+    <div class="bar"><i class="${s.contribution_pct>0?'p':'n'}" style="width:${Math.abs(s.contribution_pct)/mx*50}%"></i></div></div>`).join('');
+
+  drawForecast(m); drawBacktest(m); drawReplay(m);
+  fillScorecard(m); fillLadder(m); fillDrivers(m); fillRegimes(m); fillReplay(m); calc();
+}
+
+const baseOpts = () => ({responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+  plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:9,boxHeight:9,
+      font:{family:"'IBM Plex Sans'",size:11},color:CSS('--ink2'),padding:14,usePointStyle:true,
+      filter:i=>!['P10','P90'].includes(i.text)}},
+    tooltip:{backgroundColor:'#16181d',padding:10,cornerRadius:3,titleFont:{size:11},bodyFont:{family:"'IBM Plex Mono'",size:11}}},
+  scales:{x:{grid:{display:false},ticks:{font:{size:10},color:CSS('--mute'),maxRotation:0,autoSkipPadding:22}},
+    y:{grid:{color:CSS('--rule2')},border:{display:false},ticks:{font:{family:"'IBM Plex Mono'",size:10},color:CSS('--mute')}}}});
+
+function drawForecast(m){
+  const s = m.series; fcChart && fcChart.destroy();
+  fcChart = new Chart($('fcChart'), {type:'line', data:{labels:s.labels, datasets:[
+    {label:'P90',data:s.p90,borderColor:'transparent',backgroundColor:'rgba(200,16,46,.09)',fill:'+1',pointRadius:0,tension:.25},
+    {label:'P10',data:s.p10,borderColor:'transparent',backgroundColor:'transparent',pointRadius:0,tension:.25},
+    {label:'Actual',data:s.actual,borderColor:CSS('--ink'),borderWidth:1.8,pointRadius:0,tension:.2},
+    {label:'Forecast P50',data:s.p50,borderColor:CSS('--acg'),borderWidth:2.2,borderDash:[5,3],pointRadius:0,tension:.25},
+    {label:'Naïve',data:s.naive,borderColor:CSS('--mute'),borderWidth:1.2,borderDash:[2,3],pointRadius:0}
+  ]}, options:baseOpts()});
+}
+function drawBacktest(m){
+  const b = m.backtest; btChart && btChart.destroy();
+  btChart = new Chart($('btChart'), {type:'line', data:{labels:b.labels, datasets:[
+    {label:'P90',data:b.p90,borderColor:'transparent',backgroundColor:'rgba(200,16,46,.08)',fill:'+1',pointRadius:0,tension:.2},
+    {label:'P10',data:b.p10,borderColor:'transparent',pointRadius:0,tension:.2},
+    {label:'Realised',data:b.actual,borderColor:CSS('--ink'),borderWidth:1.8,pointRadius:0,tension:.2},
+    {label:'Forecast made 3 months earlier',data:b.pred,borderColor:CSS('--acg'),borderWidth:1.6,pointRadius:0,tension:.2}
+  ]}, options:baseOpts()});
+}
+function drawReplay(m){
+  const c = m.replay.curve; rpChart && rpChart.destroy();
+  const pts = k => c.price.map((p,i)=>c.signal[i]===k?p:null);
+  rpChart = new Chart($('rpChart'), {type:'line', data:{labels:c.labels, datasets:[
+    {label:'Purchase price',data:c.price,borderColor:CSS('--ink'),borderWidth:1.6,pointRadius:0,tension:.2},
+    {label:'BUY NOW',data:pts('BUY NOW'),showLine:false,pointRadius:5,pointBackgroundColor:CSS('--buy'),borderColor:CSS('--buy')},
+    {label:'DEFER',data:pts('DEFER'),showLine:false,pointRadius:5,pointBackgroundColor:CSS('--defer'),borderColor:CSS('--defer')}
+  ]}, options:baseOpts()});
+}
+
+function fillScorecard(m){
+  const rows = w => m.scorecard.filter(r=>r.window===w).map(r=>{
+    const pass = r.skill >= r.gate_skill;
+    return `<tr class="${r.h===H?'hl':''}"><td>${r.h} month${r.h>1?'s':''}</td><td class="r num">${r.n}</td>
+      <td class="r num">${r.ens.toFixed(2)}%</td><td class="r num">${r.naive.toFixed(2)}%</td>
+      <td class="r num" style="color:${r.skill>0?CSS('--buy'):r.skill<0?CSS('--acg'):CSS('--mute')}">${pct(r.skill)}</td>
+      <td class="r num">${r.dir==null?'—':r.dir.toFixed(1)+'%'}</td>
+      <td class="r num">${r.dm_p==null?'—':r.dm_p.toFixed(3)}</td>
+      <td class="r"><span class="chip ${pass?'ok':'no'}">≥${r.gate_skill}% ${pass?'pass':'miss'}</span></td></tr>`;}).join('');
+  const ho = rows('holdout');
+  $('scTable').querySelector('tbody').innerHTML =
+    '<tr class="sep"><td colspan="8">Development, origins 2018–2024</td></tr>' + rows('development') +
+    (ho ? '<tr class="sep"><td colspan="8">Holdout, origins 2025 onward (scored once)</td></tr>' + ho : '');
+  const d3 = m.scorecard.filter(r=>r.window==='development'&&r.h===3)[0];
+  $('scSub').textContent = 'Smart Buy headline ensemble · gates set in Round 1';
+  const sig = d3.dm_p!=null && d3.dm_p<0.10;
+  $('scFlag').innerHTML = `<b>At the 3-month decision horizon the skill is ${pct(d3.skill)} against a ≥15% gate${d3.skill>=15?' (pass)':' (missed)'}; the improvement over naïve is ${sig?'':'<u>not</u> '}statistically significant (DM p = ${d3.dm_p==null?'—':d3.dm_p.toFixed(3)}).</b> Gates are reported unchanged from Round 1.`;
+}
+function fillLadder(m){
+  $('ldTable').querySelector('tbody').innerHTML = m.ladder.map(r=>`
+    <tr class="${r.is_headline?'hl':''} ${r.weight===0?'dim':''}"><td>${r.model}</td>
+      <td class="r num">${r.mape.toFixed(2)}%</td>
+      <td class="r num" style="color:${r.skill>0?CSS('--buy'):r.skill<0?CSS('--acg'):CSS('--mute')}">${pct(r.skill)}</td>
+      <td class="r num">${r.dir==null?'—':r.dir.toFixed(1)+'%'}</td>
+      <td class="r num">${r.dm_p==null?'—':r.dm_p.toFixed(3)}</td>
+      <td class="r">${r.weight==null?'—':r.weight===0?'<span class="chip zero">gated out</span>':'<span class="num">'+r.weight.toFixed(1)+'%</span>'}</td></tr>`).join('');
+  const e = m.err_corr;
+  $('ldNote').innerHTML = `Weight = average share of the headline ensemble over the development months (a model earns a share only in months when it had beaten naïve on its own past forecasts). Naïve was used alone in <b class="num">${m.fallback_pct}%</b> of months. Mean error correlation between members is <b class="num">${e.mean_off_diag}</b>; the most independent member is ${e.most_diversifying} (<b class="num">${e.its_mean_corr}</b>).`;
+}
+function fillDrivers(m){
+  const mx = Math.max(...m.drivers.map(d=>Math.abs(d.rho)));
+  $('drvList').innerHTML = m.drivers.map(d=>`<div class="dr">
+      <div class="n" title="${d.name}">${d.name}${d.sig?' <span class="chip ok" style="margin-left:5px">granger</span>':''}</div>
+      <div class="l">${d.lead===0?'same mo':'lead '+d.lead}</div>
+      <div class="bar"><i class="${d.rho>0?'p':'n'}" style="width:${Math.abs(d.rho)/mx*50}%"></i></div></div>`).join('');
+}
+function fillRegimes(m){
+  $('rgTable').querySelector('tbody').innerHTML = m.regimes.map(r=>`
+    <tr><td>${r.name}</td><td class="r num">${r.n}</td><td class="r num">${r.mape.toFixed(2)}%</td>
+      <td class="r num" style="color:${r.skill>0?CSS('--buy'):CSS('--acg')}">${pct(r.skill)}</td>
+      <td class="r num">${r.dir==null?'—':r.dir.toFixed(1)+'%'}</td><td class="r num">${r.cov.toFixed(1)}%</td></tr>`).join('');
+  const dv = m.bands.filter(r=>r.window==='development');
+  $('bdTable').querySelector('tbody').innerHTML = dv.map(r=>{
+    const ok = r.cov>=75 && r.cov<=85;
+    return `<tr class="${r.h===H?'hl':''}"><td>${r.h} month${r.h===1?'':'s'}</td>
+      <td class="r num">${r.cov.toFixed(1)}%</td><td class="r num">${m.bands_gauss[r.h]!=null?m.bands_gauss[r.h].toFixed(1)+'%':'—'}</td>
+      <td class="r num">${r.width.toFixed(1)}%</td>
+      <td class="r"><span class="chip ${ok?'ok':'no'}">${ok?'pass':'miss'}</span></td></tr>`;}).join('');
+  const lo = Math.min(...dv.map(r=>r.cov)), hi = Math.max(...dv.map(r=>r.cov));
+  const npass = dv.filter(r=>r.cov>=75&&r.cov<=85).length;
+  $('bdFlag').innerHTML = `<b>Calibrated coverage runs ${lo.toFixed(0)}–${hi.toFixed(0)}% against the 75–85% gate (${npass} of 6 horizons pass).</b> Round 2 reported 55–65% with no calibration step; the conformal step is now real.`;
+}
+function fillReplay(m){
+  const r = m.replay, tot = Object.values(r.signals).reduce((a,b)=>a+b,0);
+  $('rpTitle').textContent = `Buying replay, development window (${r.months} months)`;
+  const wc = r.extra_working_capital_cr_per_100cr_spend;
+  $('rpKpis').innerHTML = `
+    <div class="kpi"><div class="k">Net saving after carry</div>
+      <div class="v" style="color:${r.net_saving_after_carry_pct>0?CSS('--buy'):CSS('--acg')}">${pct(r.net_saving_after_carry_pct,2)}</div>
+      <div class="f">₹${r.net_saving_after_carry_pct.toFixed(2)} Cr per ₹100 Cr spend</div></div>
+    <div class="kpi"><div class="k">Better than random timing?</div>
+      <div class="v">p = ${r.permutation_p_value.toFixed(3)}</div>
+      <div class="f">random placement of the same signals: median ${pct(r.random_timing_median_pct,2)}</div></div>
+    <div class="kpi"><div class="k">Perfect-foresight ceiling</div>
+      <div class="v">${pct(r.perfect_foresight_net_pct,2)}</div><div class="f">same rule, actual prices known</div></div>
+    <div class="kpi"><div class="k">Gross price saving</div>
+      <div class="v">${pct(r.gross_price_saving_pct,2)}</div><div class="f">before carrying cost</div></div>
+    <div class="kpi"><div class="k">Inventory cover</div>
+      <div class="v">${r.inventory_days_smartbuy.toFixed(1)} d</div>
+      <div class="f">${pct(r.inventory_days_change,1)} days vs ${r.inventory_days_baseline.toFixed(1)}</div></div>
+    <div class="kpi"><div class="k">Working capital</div>
+      <div class="v">${wc>0?'+':wc<0?'−':''}₹${Math.abs(wc).toFixed(2)} Cr</div>
+      <div class="f">${wc>0?'more tied up':wc<0?'released':'unchanged'}, per ₹100 Cr</div></div>`;
+  $('rpSignals').innerHTML = '<div style="font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:9px">Signals fired</div>' +
+    ['BUY NOW','BUY NORMAL','DEFER'].map(k=>{ const v=r.signals[k]||0; return `
+      <div class="dr" style="grid-template-columns:1fr 46px 96px"><div class="n">${k}</div><div class="l">${v} mo</div>
+      <div class="bar"><i class="p" style="left:0;width:${v/tot*100}%;background:${k==='DEFER'?CSS('--defer'):k==='BUY NOW'?CSS('--buy'):CSS('--hold')}"></i></div></div>`;}).join('') +
+    `<div style="font-size:11px;color:var(--mute);margin-top:10px">The rule stays at BUY NORMAL ${((r.signals['BUY NORMAL']||0)/tot*100).toFixed(0)}% of the time.</div>`;
+  const ho = r.holdout;
+  $('rpNote').innerHTML = `Monthly requirement held constant (no ACG demand data). Leftover inventory is valued at the final price so both policies are compared on equal consumption. `
+    + `A permutation p-value above 0.10 means the saving cannot be told apart from luck in timing.`
+    + (ho ? ` <b>Holdout (${ho.months} months):</b> net ${pct(ho.net_saving_after_carry_pct,2)}, permutation p = ${ho.permutation_p_value.toFixed(3)}.` : '');
+}
+
+['bom','oh','it'].forEach(id => $(id).addEventListener('input', calc));
+function calc(){
+  const m = D.materials[MAT], cover = m.horizons[H].cover;
+  const bom = +$('bom').value||0, oh = +$('oh').value||0, it = +$('it').value||0;
+  const qty = Math.max(0, Math.round(cover*bom - oh - it));
+  $('calcQty').textContent = fmt(qty) + ' t';
+  $('calcFormula').textContent = `${cover.toFixed(1)} × ${fmt(bom)} − ${fmt(oh)} − ${fmt(it)} = ${fmt(qty)} t`
+    + (qty===0 ? ' · cover already met' : (m.cur ? ` · ≈ $${fmt(qty*m.spot/1000)}k at latest price` : ''));
+}
+render();
+</script>
+</body>
+</html>
